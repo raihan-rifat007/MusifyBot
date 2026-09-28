@@ -1,0 +1,22 @@
+{
+  "name": "musicapi-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot and Mini App for music search, discovery, lyrics, albums, playlists, and artist lookups",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "build:zip": "node scripts/zip.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "express": "^4.19.2",
+    "node-telegram-bot-api": "^0.66.0"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1"
+  }
+}

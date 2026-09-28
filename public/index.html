@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Music</title>
+<link rel="stylesheet" href="/styles.css">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="status-dot" id="statusDot"></span>
+      <span class="brand-name" id="brandName">Music Bot</span>
+    </div>
+    <div class="uptime" id="uptimeDisplay">--</div>
+  </header>
+
+  <main id="viewHost">
+
+    <section class="view" id="view-home" data-view="home">
+      <div class="grid">
+        <button class="tile tile-accent" data-nav="search">
+          Search
+        </button>
+        <button class="tile" data-nav="help">
+          Help
+        </button>
+        <button class="tile" data-nav="status">
+          Status
+        </button>
+      </div>
+    </section>
+
+    <section class="view hidden" id="view-search" data-view="search">
+      <div class="field-card">
+        <input type="text" id="searchInput" class="field-input" placeholder="song name or artist" autocomplete="off">
+        <button class="btn-primary" id="searchButton">Search</button>
+      </div>
+      <div class="results" id="searchResults"></div>
+    </section>
+
+    <section class="view hidden" id="view-help" data-view="help">
+      <div class="help-list" id="helpList"></div>
+    </section>
+
+    <section class="view hidden" id="view-status" data-view="status">
+      <div class="stat-card">
+        <div class="stat-row">
+          <span class="stat-label">Uptime</span>
+          <span class="stat-value" id="statUptime">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Memory</span>
+          <span class="stat-value" id="statMemory">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">API</span>
+          <span class="stat-value" id="statApi">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Sessions</span>
+          <span class="stat-value" id="statSessions">--</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="backbar hidden" id="backBar">
+    <button class="btn-back" id="backButton">Back</button>
+  </nav>
+
+  <div class="toast hidden" id="toast"></div>
+
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

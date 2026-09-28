@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: musicapi-telegram-bot
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: BOT_USERNAME
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false
+      - key: PUBLIC_URL
+        sync: false
+      - key: PORT
+        value: 10000
+      - key: MINI_APP_PATH
+        value: /app
