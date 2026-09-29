@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: musicapi-telegram-bot
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: BOT_USERNAME
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false
+      - key: PUBLIC_URL
+        sync: false
+      - key: PORT
+        value: "10000"
+      - key: MINI_APP_PATH
+        value: /app
+      - key: DOCS_PATH
+        value: /docs
+      - key: MUSIC_API_BASE
+        value: https://raihan07-musicapi.vercel.app
+      - key: COOLDOWN_MS
+        value: "3000"
+      - key: MAX_CONCURRENT_DOWNLOADS
+        value: "3"
+      - key: MAX_AUDIO_MB
+        value: "20"
+      - key: SYNC_BOT_PROFILE
+        value: "true"

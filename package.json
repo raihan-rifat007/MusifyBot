@@ -1,0 +1,24 @@
+{
+  "name": "musicapi-telegram-bot",
+  "version": "2.0.0",
+  "description": "Telegram music bot with instant play, pick-list search, recent history, inline mode and a Mini App",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test",
+    "build:zip": "node scripts/zip.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "express": "^4.19.2",
+    "node-telegram-bot-api": "^0.66.0"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1"
+  }
+}

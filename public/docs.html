@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Music Bot — Docs</title>
+<style>
+:root {
+  --ink: #000000;
+  --paper: #ffffff;
+  --field: #f5f5f0;
+  --accent: #ffeb00;
+  --danger: #ff3b3b;
+  --border: 3px;
+  --radius: 10px;
+  --max-width: 780px;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: ui-monospace, "SF Mono", "Courier New", monospace;
+  line-height: 1.5;
+}
+.wrap {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+.hero {
+  border: var(--border) solid var(--ink);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  margin-bottom: 28px;
+  background: var(--paper);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.hero-label {
+  display: inline-block;
+  background: var(--accent);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+h1 {
+  font-size: 30px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  line-height: 1.15;
+}
+.hero p {
+  font-size: 15px;
+  max-width: 60ch;
+  margin: 0 0 20px;
+}
+.mock-chat {
+  border: var(--border) solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--field);
+  padding: 16px;
+  font-size: 13px;
+}
+.mock-line {
+  margin: 0 0 10px;
+  white-space: pre-wrap;
+}
+.mock-line:last-child { margin-bottom: 0; }
+.mock-user {
+  font-weight: 700;
+}
+.mock-bot {
+  opacity: 0.85;
+}
+.cta-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-block;
+  border: var(--border) solid var(--ink);
+  border-radius: var(--radius);
+  padding: 11px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform 0.08s linear, box-shadow 0.08s linear;
+}
+.btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--ink);
+}
+.btn-accent {
+  background: var(--accent);
+}
+section {
+  margin-bottom: 28px;
+}
+h2 {
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: var(--border) solid var(--ink);
+  padding-bottom: 8px;
+  margin: 0 0 16px;
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.feature-card {
+  border: var(--border) solid var(--ink);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.feature-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+.feature-desc {
+  font-size: 13px;
+  opacity: 0.75;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th, td {
+  text-align: left;
+  padding: 10px 12px;
+  border: var(--border) solid var(--ink);
+}
+th {
+  background: var(--accent);
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.stack-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.stack-item {
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--field);
+}
+.note-box {
+  border: var(--border) solid var(--ink);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  background: var(--field);
+  font-size: 13px;
+}
+.note-box strong {
+  display: block;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+footer {
+  border-top: var(--border) solid var(--ink);
+  padding-top: 20px;
+  font-size: 12px;
+  opacity: 0.6;
+}
+@media (max-width: 500px) {
+  h1 { font-size: 24px; }
+  .hero { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="hero-label">Telegram Bot</span>
+    <h1>Type a song name.<br>Get the track back.</h1>
+    <p>Play instantly or pick from a list, replay what you played before, and search from any chat with inline mode. No slash required.</p>
+    <div class="mock-chat">
+      <p class="mock-line mock-user">you: play perfect ed sheeran</p>
+      <p class="mock-line mock-bot">bot: [sends the audio file]</p>
+      <p class="mock-line mock-user">you: serach shape of you</p>
+      <p class="mock-line mock-bot">bot: Assuming you meant "search".</p>
+      <p class="mock-line mock-bot">bot: 🔍 Searching shape of you on the music library...</p>
+      <p class="mock-line mock-bot">bot: Results for "shape of you" — 1-10 of 14. Tap a track to download it, or reply with its number.</p>
+      <p class="mock-line mock-user">you: recent</p>
+      <p class="mock-line mock-bot">bot: 🕘 Recently played — tap a track to play it again.</p>
+    </div>
+    <div class="cta-row">
+      <a class="btn btn-accent" href="#commands">See commands</a>
+      <a class="btn" href="#inline">Inline mode</a>
+      <a class="btn" href="#architecture">How it works</a>
+    </div>
+  </div>
+
+  <section id="features">
+    <h2>What it does</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-title">Play instantly</div>
+        <div class="feature-desc">/play, or type play &lt;song&gt; or p &lt;song&gt;. The best match downloads straight away, no list.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Search a pick-list</div>
+        <div class="feature-desc">/search, or type search &lt;song&gt; or find &lt;song&gt;. Ten numbered results per page, tap or reply with a number.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Recently played</div>
+        <div class="feature-desc">/recent, or just type recent or history. Your last ten tracks, newest first, one tap to replay.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Inline mode</div>
+        <div class="feature-desc">Type the bot name and a song in any chat to send a track without opening the bot.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Typo tolerance</div>
+        <div class="feature-desc">plya, serach and fnid still work, and the bot tells you what it assumed. Real words are never rewritten.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Fair-use limits</div>
+        <div class="feature-desc">A short cooldown and one download at a time per chat keep the bot fast for everyone.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Lyrics</div>
+        <div class="feature-desc">Tap the Lyrics button under any track, or use /lyrics artist - title. Long lyrics arrive in several messages.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Companion mini app</div>
+        <div class="feature-desc">A brutalist in-Telegram app for searching without typing commands.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">Real filenames</div>
+        <div class="feature-desc">Files arrive named by artist and title, with the right title and performer, never a raw hash.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="shortcuts">
+    <h2>No-slash shortcuts</h2>
+    <table>
+      <thead>
+        <tr><th>You type</th><th>Same as</th><th>What happens</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>play &lt;song&gt;<br>p &lt;song&gt;</td><td>/play</td><td>Downloads the best match</td></tr>
+        <tr><td>search &lt;song&gt;<br>find &lt;song&gt;</td><td>/search</td><td>Shows a list to pick from</td></tr>
+        <tr><td>recent<br>history</td><td>/recent</td><td>Shows what you played before</td></tr>
+        <tr><td>a number</td><td>tapping a row</td><td>Picks that item from the current list</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="commands">
+    <h2>Commands</h2>
+    <table>
+      <thead>
+        <tr><th>Command</th><th>Arguments</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>/start</td><td>—</td><td>Welcome message</td></tr>
+        <tr><td>/help</td><td>—</td><td>List all commands</td></tr>
+        <tr><td>/play</td><td>&lt;query&gt;</td><td>Instantly downloads the best match</td></tr>
+        <tr><td>/search</td><td>&lt;query&gt;</td><td>Shows a list of results to pick from</td></tr>
+        <tr><td>/recent</td><td>—</td><td>Replay your recently played tracks</td></tr>
+        <tr><td>/lyrics</td><td>&lt;artist&gt; - &lt;title&gt;</td><td>Fetch lyrics</td></tr>
+        <tr><td>/app</td><td>—</td><td>Open the mini app</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="inline">
+    <h2>Inline mode</h2>
+    <div class="note-box">
+      <strong>Search from any chat</strong>
+      Type the bot's username followed by a song name in any conversation, then pick a result. Telegram fetches the audio itself for inline results, so the file can show the source's own filename instead of the clean artist and title naming used inside the bot chat.
+    </div>
+  </section>
+
+  <section id="architecture">
+    <h2>How it works</h2>
+    <p style="font-size: 13px; max-width: 65ch; margin-bottom: 16px;">Telegram delivers updates to this server over a webhook. Playing a track searches the music API and downloads the top match into memory; searching sends a "Searching..." message that edits in place into a numbered, tappable list. Either way, the finished file is uploaded to Telegram with real title and artist metadata, and the track is added to your recent history.</p>
+    <div class="note-box">
+      <strong>Stack</strong>
+      <div class="stack-list">
+        <span class="stack-item">Node.js 18</span>
+        <span class="stack-item">Express</span>
+        <span class="stack-item">node-telegram-bot-api</span>
+        <span class="stack-item">Telegram Bot API</span>
+        <span class="stack-item">Webhook delivery</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Built with Node.js and the Telegram Bot API.
+  </footer>
+
+</div>
+</body>
+</html>
