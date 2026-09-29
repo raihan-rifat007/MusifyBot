@@ -4,316 +4,1250 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Music Bot — Docs</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M21 6v14.5a3.5 3.5 0 1 1-2-3.15V9.5l-8 2v9.5a3.5 3.5 0 1 1-2-3.15V8l12-2z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 :root {
+  --cream: #FFFFFF;
+  --cream-2: #F4F4F4;
+  --cream-3: #E5E5E5;
   --ink: #000000;
-  --paper: #ffffff;
-  --field: #f5f5f0;
-  --accent: #ffeb00;
-  --danger: #ff3b3b;
-  --border: 3px;
-  --radius: 10px;
-  --max-width: 780px;
+  --ink-2: #171717;
+  --ink-3: #555555;
+  --sage: #333333;
+  --espresso: #0A0A0A;
+  --gold: #111111;
+  --gold-2: #333333;
+  --red: #111111;
+  --green: #111111;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-pill: 100px;
+
+  --shadow-soft: 0 2px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.05);
+  --shadow-card: 0 8px 48px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-float: 0 24px 80px rgba(0,0,0,0.14), 0 4px 16px rgba(0,0,0,0.08);
+
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --max-width: 1000px;
 }
-* { box-sizing: border-box; }
-html, body {
+
+*, *::before, *::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  background: var(--paper);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background-color: var(--cream);
   color: var(--ink);
-  font-family: ui-monospace, "SF Mono", "Courier New", monospace;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 15px;
+  min-height: 100dvh;
+  overflow-x: hidden;
 }
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  mix-blend-mode: multiply;
+}
+
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--ink);
+  z-index: 200;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.nav {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  width: calc(100% - 3rem);
+  max-width: 900px;
+}
+
+.nav-inner {
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: var(--radius-pill);
+  padding: 0.6rem 0.75rem 0.6rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-soft);
+}
+
+.nav-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.nav-logo-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-logo-mark svg {
+  width: 16px;
+  height: 16px;
+}
+
+.nav-logo-text em {
+  color: var(--gold);
+  font-style: normal;
+  font-weight: 900;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.nav-link-item {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink-3);
+  text-decoration: none;
+  padding: 0.4rem 0.875rem;
+  border-radius: var(--radius-pill);
+  transition: all 400ms var(--ease-out);
+}
+
+.nav-link-item:hover {
+  color: var(--ink);
+  background: rgba(0,0,0,0.06);
+}
+
+.nav-burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 300ms var(--ease-out);
+}
+
+.nav-burger:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+.nav-burger span {
+  display: block;
+  width: 1.125rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+  transition: transform 350ms var(--ease-out), opacity 250ms;
+}
+
+.nav-burger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-burger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-burger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.nav-menu {
+  margin-top: 0.5rem;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 0.5rem;
+  display: none;
+  flex-direction: column;
+}
+
+.nav-menu.open {
+  display: flex;
+}
+
+.nav-menu-item {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  transition: background 250ms;
+}
+
+.nav-menu-item:hover {
+  background: rgba(0,0,0,0.05);
+  color: var(--ink);
+}
+
 .wrap {
+  width: 100%;
   max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 32px 20px 80px;
+  margin-inline: auto;
+  padding: 8rem 2rem 6rem;
 }
+
 .hero {
-  border: var(--border) solid var(--ink);
-  border-radius: var(--radius);
-  padding: 28px 24px;
-  margin-bottom: 28px;
-  background: var(--paper);
-  box-shadow: 6px 6px 0 var(--ink);
+  margin-bottom: 5rem;
 }
-.hero-label {
-  display: inline-block;
-  background: var(--accent);
-  border: 2px solid var(--ink);
-  border-radius: 6px;
-  padding: 3px 10px;
-  font-size: 11px;
-  font-weight: 700;
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.875rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  margin-bottom: 16px;
+  color: var(--ink-3);
+  margin-bottom: 1.75rem;
 }
-h1 {
-  font-size: 30px;
-  font-weight: 700;
-  margin: 0 0 12px;
+
+.hero-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+
+.hero-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.hero-logo-mark {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-card);
+  flex-shrink: 0;
+}
+
+.hero-logo-mark svg {
+  width: 32px;
+  height: 32px;
+}
+
+.hero-logo-text {
+  display: flex;
+  flex-direction: column;
   line-height: 1.15;
 }
-.hero p {
-  font-size: 15px;
-  max-width: 60ch;
-  margin: 0 0 20px;
+
+.hero-logo-text strong {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--ink);
 }
-.mock-chat {
-  border: var(--border) solid var(--ink);
-  border-radius: var(--radius);
-  background: var(--field);
-  padding: 16px;
-  font-size: 13px;
+
+.hero-logo-text small {
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  color: var(--ink-3);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 4px;
 }
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 5.5vw, 4.25rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+  max-width: 16ch;
+}
+
+h1 em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.hero-sub {
+  font-size: 1.0625rem;
+  font-weight: 300;
+  color: var(--ink-3);
+  line-height: 1.7;
+  max-width: 52ch;
+  margin-bottom: 2.5rem;
+}
+
+.mock-shell {
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: var(--radius-xl);
+  padding: 0.375rem;
+  max-width: 680px;
+  margin-bottom: 2rem;
+}
+
+.mock-core {
+  background: var(--cream);
+  border-radius: calc(var(--radius-xl) - 0.375rem);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(0,0,0,0.04);
+  padding: 1.5rem;
+  font-size: 0.875rem;
+  font-family: 'DM Mono', monospace;
+}
+
 .mock-line {
-  margin: 0 0 10px;
+  margin: 0 0 0.75rem;
   white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--ink-2);
 }
-.mock-line:last-child { margin-bottom: 0; }
+
+.mock-line:last-child {
+  margin-bottom: 0;
+}
+
 .mock-user {
-  font-weight: 700;
+  font-weight: 500;
+  color: var(--ink);
 }
+
 .mock-bot {
-  opacity: 0.85;
+  color: var(--ink-3);
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--cream-3);
 }
+
 .cta-row {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
+
 .btn {
-  display: inline-block;
-  border: var(--border) solid var(--ink);
-  border-radius: var(--radius);
-  padding: 11px 18px;
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: var(--radius-pill);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
   text-decoration: none;
-  color: var(--ink);
-  background: var(--paper);
-  box-shadow: 4px 4px 0 var(--ink);
-  transition: transform 0.08s linear, box-shadow 0.08s linear;
+  transition: all 400ms var(--ease-out);
+  white-space: nowrap;
 }
+
 .btn:active {
-  transform: translate(4px, 4px);
-  box-shadow: 0 0 0 var(--ink);
+  transform: scale(0.97);
 }
-.btn-accent {
-  background: var(--accent);
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--cream);
 }
+
+.btn-primary:hover {
+  background: var(--ink-2);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primary .btn-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 400ms var(--ease-out);
+}
+
+.btn-primary:hover .btn-icon {
+  transform: translate(2px, -1px) scale(1.08);
+}
+
+.btn-secondary {
+  background: var(--cream-2);
+  color: var(--ink-2);
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.btn-secondary:hover {
+  background: var(--cream-3);
+  border-color: rgba(0,0,0,0.16);
+}
+
 section {
-  margin-bottom: 28px;
+  margin-bottom: 5rem;
+  scroll-margin-top: 7rem;
 }
-h2 {
-  font-size: 18px;
-  font-weight: 700;
+
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: rgba(0,0,0,0.05);
+  border-radius: var(--radius-pill);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  border-bottom: var(--border) solid var(--ink);
-  padding-bottom: 8px;
-  margin: 0 0 16px;
+  color: var(--ink-3);
+  margin-bottom: 1.25rem;
 }
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+
+.section-sub {
+  font-size: 1rem;
+  color: var(--ink-3);
+  line-height: 1.7;
+  max-width: 52ch;
+  margin-bottom: 2.5rem;
+}
+
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
 }
+
 .feature-card {
-  border: var(--border) solid var(--ink);
-  border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: 4px 4px 0 var(--ink);
+  background: rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: var(--radius-xl);
+  padding: 0.375rem;
+  transition: transform 500ms var(--ease-out), box-shadow 500ms var(--ease-out);
 }
+
+.feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+}
+
+.feature-card-inner {
+  background: white;
+  border-radius: calc(var(--radius-xl) - 0.375rem);
+  padding: 1.5rem;
+  height: 100%;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,1);
+}
+
+.feature-card:nth-child(1) { grid-column: span 7; }
+.feature-card:nth-child(2) { grid-column: span 5; }
+.feature-card:nth-child(3),
+.feature-card:nth-child(4),
+.feature-card:nth-child(5),
+.feature-card:nth-child(6),
+.feature-card:nth-child(7),
+.feature-card:nth-child(8) { grid-column: span 4; }
+.feature-card:nth-child(9) { grid-column: span 12; }
+
+.feature-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background: var(--cream-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  color: var(--ink);
+}
+
+.feature-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 .feature-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.125rem;
   font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 6px;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
 }
+
 .feature-desc {
-  font-size: 13px;
-  opacity: 0.75;
+  font-size: 0.875rem;
+  color: var(--ink-3);
+  line-height: 1.65;
 }
+
+.table-shell {
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: var(--radius-xl);
+  padding: 0.375rem;
+  overflow: hidden;
+}
+
+.table-core {
+  background: white;
+  border-radius: calc(var(--radius-xl) - 0.375rem);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,1);
+  overflow: hidden;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 0.875rem;
 }
+
 th, td {
   text-align: left;
-  padding: 10px 12px;
-  border: var(--border) solid var(--ink);
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
 }
+
 th {
-  background: var(--accent);
+  background: var(--cream-2);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-size: 11px;
+  color: var(--ink-3);
 }
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr {
+  transition: background 250ms var(--ease-out);
+}
+
+tbody tr:hover {
+  background: var(--cream-2);
+}
+
+td code {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8125rem;
+  background: var(--cream-2);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  color: var(--ink);
+}
+
+.note-shell {
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: var(--radius-xl);
+  padding: 0.375rem;
+}
+
+.note-core {
+  background: white;
+  border-radius: calc(var(--radius-xl) - 0.375rem);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,1);
+  padding: 1.75rem;
+  font-size: 0.9375rem;
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+
+.note-core strong {
+  display: block;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.75rem;
+}
+
 .stack-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
+
 .stack-item {
-  border: 2px solid var(--ink);
-  border-radius: 6px;
-  padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 700;
-  background: var(--field);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  background: var(--cream-2);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: var(--radius-pill);
+  padding: 0.4rem 0.875rem;
+  transition: all 300ms var(--ease-out);
 }
-.note-box {
-  border: var(--border) solid var(--ink);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  background: var(--field);
-  font-size: 13px;
+
+.stack-item:hover {
+  background: var(--ink);
+  color: var(--cream);
+  border-color: var(--ink);
 }
-.note-box strong {
-  display: block;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  font-size: 12px;
+
+.arch-text {
+  font-size: 0.9375rem;
+  max-width: 65ch;
+  margin: 0 0 1.5rem;
+  color: var(--ink-2);
+  line-height: 1.75;
 }
+
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.faq-item {
+  background: rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: box-shadow 400ms var(--ease-out);
+}
+
+.faq-item[open] {
+  box-shadow: var(--shadow-card);
+}
+
+.faq-item summary {
+  padding: 1.25rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--ink);
+  transition: background 300ms;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::after {
+  content: '';
+  width: 1rem;
+  height: 1rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  transition: transform 350ms var(--ease-out);
+  flex-shrink: 0;
+}
+
+.faq-item[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.faq-item summary:hover {
+  background: rgba(0,0,0,0.02);
+}
+
+.faq-item p {
+  padding: 0 1.5rem 1.5rem;
+  font-size: 0.875rem;
+  color: var(--ink-3);
+  line-height: 1.7;
+}
+
 footer {
-  border-top: var(--border) solid var(--ink);
-  padding-top: 20px;
-  font-size: 12px;
-  opacity: 0.6;
+  margin-top: 6rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
-@media (max-width: 500px) {
-  h1 { font-size: 24px; }
-  .hero { padding: 20px 16px; }
+
+.footer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.875rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  background: var(--cream-2);
+}
+
+.footer-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--cream);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+  transition: all 400ms var(--ease-spring);
+  z-index: 40;
+}
+
+.to-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.to-top:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-float);
+}
+
+.to-top svg {
+  width: 16px;
+  height: 16px;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  filter: blur(4px);
+  transition: opacity 800ms var(--ease-out), transform 800ms var(--ease-out), filter 600ms var(--ease-out);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+@media (max-width: 900px) {
+  .feature-card:nth-child(1),
+  .feature-card:nth-child(2),
+  .feature-card:nth-child(3),
+  .feature-card:nth-child(4),
+  .feature-card:nth-child(5),
+  .feature-card:nth-child(6),
+  .feature-card:nth-child(7),
+  .feature-card:nth-child(8) {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 6.5rem 1.25rem 4rem;
+  }
+
+  .nav {
+    width: calc(100% - 2rem);
+    top: 1rem;
+  }
+
+  .nav-inner {
+    padding: 0.5rem 0.625rem 0.5rem 1rem;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .nav-burger {
+    display: flex;
+  }
+
+  h1 {
+    font-size: 2.25rem;
+  }
+
+  .hero-logo-mark {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+  }
+
+  .hero-logo-mark svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .hero-logo-text strong {
+    font-size: 1.25rem;
+  }
+
+  .feature-card:nth-child(1),
+  .feature-card:nth-child(2),
+  .feature-card:nth-child(3),
+  .feature-card:nth-child(4),
+  .feature-card:nth-child(5),
+  .feature-card:nth-child(6),
+  .feature-card:nth-child(7),
+  .feature-card:nth-child(8),
+  .feature-card:nth-child(9) {
+    grid-column: span 12;
+  }
+
+  th, td {
+    padding: 0.75rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .to-top {
+    bottom: 1.25rem;
+    right: 1.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
 }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <div class="hero">
-    <span class="hero-label">Telegram Bot</span>
-    <h1>Type a song name.<br>Get the track back.</h1>
-    <p>Play instantly or pick from a list, replay what you played before, and search from any chat with inline mode. No slash required.</p>
-    <div class="mock-chat">
-      <p class="mock-line mock-user">you: play perfect ed sheeran</p>
-      <p class="mock-line mock-bot">bot: [sends the audio file]</p>
-      <p class="mock-line mock-user">you: serach shape of you</p>
-      <p class="mock-line mock-bot">bot: Assuming you meant "search".</p>
-      <p class="mock-line mock-bot">bot: 🔍 Searching shape of you on the music library...</p>
-      <p class="mock-line mock-bot">bot: Results for "shape of you" — 1-10 of 14. Tap a track to download it, or reply with its number.</p>
-      <p class="mock-line mock-user">you: recent</p>
-      <p class="mock-line mock-bot">bot: 🕘 Recently played — tap a track to play it again.</p>
+<div class="progress-bar" id="progressBar"></div>
+
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="#top" class="nav-logo">
+      <span class="nav-logo-mark">
+        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M21 6v14.5a3.5 3.5 0 1 1-2-3.15V9.5l-8 2v9.5a3.5 3.5 0 1 1-2-3.15V8l12-2z" fill="#fff"/>
+        </svg>
+      </span>
+      <span class="nav-logo-text">Music<em>Bot</em></span>
+    </a>
+    <div class="nav-links">
+      <a href="#features" class="nav-link-item">Features</a>
+      <a href="#commands" class="nav-link-item">Commands</a>
+      <a href="#inline" class="nav-link-item">Inline</a>
+      <a href="#architecture" class="nav-link-item">Architecture</a>
     </div>
-    <div class="cta-row">
-      <a class="btn btn-accent" href="#commands">See commands</a>
-      <a class="btn" href="#inline">Inline mode</a>
-      <a class="btn" href="#architecture">How it works</a>
-    </div>
+    <button class="nav-burger" id="navBurger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
+  <div class="nav-menu" id="navMenu">
+    <a href="#features" class="nav-menu-item">Features</a>
+    <a href="#commands" class="nav-menu-item">Commands</a>
+    <a href="#inline" class="nav-menu-item">Inline mode</a>
+    <a href="#faq" class="nav-menu-item">FAQ</a>
+    <a href="#architecture" class="nav-menu-item">Architecture</a>
+  </div>
+</nav>
 
-  <section id="features">
-    <h2>What it does</h2>
+<div class="wrap" id="top">
+
+  <header class="hero">
+    <div class="hero-logo">
+      <span class="hero-logo-mark">
+        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M21 6v14.5a3.5 3.5 0 1 1-2-3.15V9.5l-8 2v9.5a3.5 3.5 0 1 1-2-3.15V8l12-2z" fill="#fff"/>
+        </svg>
+      </span>
+      <span class="hero-logo-text">
+        <strong>Music Bot</strong>
+        <small>Telegram · Documentation</small>
+      </span>
+    </div>
+
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot"></span>
+      Telegram Bot
+    </div>
+
+    <h1>Type a song name.<br><em>Get the track back.</em></h1>
+    <p class="hero-sub">Play instantly or pick from a list, replay what you played before, and search from any chat with inline mode. No slash required.</p>
+
+    <div class="mock-shell">
+      <div class="mock-core">
+        <p class="mock-line mock-user">you: play perfect ed sheeran</p>
+        <p class="mock-line mock-bot">bot: [sends the audio file]</p>
+        <p class="mock-line mock-user">you: serach shape of you</p>
+        <p class="mock-line mock-bot">bot: Assuming you meant "search".</p>
+        <p class="mock-line mock-bot">bot: 🔍 Searching shape of you on the music library...</p>
+        <p class="mock-line mock-bot">bot: Results for "shape of you" — 1-10 of 14. Tap a track to download it, or reply with its number.</p>
+        <p class="mock-line mock-user">you: recent</p>
+        <p class="mock-line mock-bot">bot: 🕘 Recently played — tap a track to play it again.</p>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#commands">
+        <span>See commands</span>
+        <span class="btn-icon" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </span>
+      </a>
+      <a class="btn btn-secondary" href="#inline">Inline mode</a>
+    </div>
+  </header>
+
+  <section id="features" class="reveal">
+    <div class="section-eyebrow">Features</div>
+    <h2 class="section-title">Built for speed and no friction</h2>
+    <p class="section-sub">Everything tuned to get a working track in your hands with as few steps as possible.</p>
+
     <div class="feature-grid">
       <div class="feature-card">
-        <div class="feature-title">Play instantly</div>
-        <div class="feature-desc">/play, or type play &lt;song&gt; or p &lt;song&gt;. The best match downloads straight away, no list.</div>
+        <div class="feature-card-inner">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="feature-title">Play instantly</div>
+          <div class="feature-desc">/play, or type play &lt;song&gt; or p &lt;song&gt;. The best match downloads straight away, no list.</div>
+        </div>
       </div>
+
       <div class="feature-card">
-        <div class="feature-title">Search a pick-list</div>
-        <div class="feature-desc">/search, or type search &lt;song&gt; or find &lt;song&gt;. Ten numbered results per page, tap or reply with a number.</div>
+        <div class="feature-card-inner">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <div class="feature-title">Search a pick-list</div>
+          <div class="feature-desc">/search, or type search &lt;song&gt; or find &lt;song&gt;. Ten numbered results per page, tap or reply with a number.</div>
+        </div>
       </div>
+
       <div class="feature-card">
-        <div class="feature-title">Recently played</div>
-        <div class="feature-desc">/recent, or just type recent or history. Your last ten tracks, newest first, one tap to replay.</div>
+        <div class="feature-card-inner">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="feature-title">Recently played</div>
+          <div class="feature-desc">/recent, or just type recent or history. Last ten tracks, one tap to replay.</div>
+        </div>
       </div>
+
       <div class="feature-card">
-        <div class="feature-title">Inline mode</div>
-        <div class="feature-desc">Type the bot name and a song in any chat to send a track without opening the bot.</div>
+        <div class="feature-card-inner">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="feature-title">Inline mode</div>
+          <div class="feature-desc">Type the bot name and a song in any chat to send a track without opening the bot.</div>
+        </div>
       </div>
+
       <div class="feature-card">
-        <div class="feature-title">Typo tolerance</div>
-        <div class="feature-desc">plya, serach and fnid still work, and the bot tells you what it assumed. Real words are never rewritten.</div>
+        <div class="feature-card-inner">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </div>
+          <div class="feature-title">Typo tolerance</div>
+          <div class="feature-desc">plya, serach, fnid still work — and the bot tells you what it assumed.</div>
+        </div>
       </div>
+
       <div class="feature-card">
-        <div class="feature-title">Fair-use limits</div>
-        <div class="feature-desc">A short cooldown and one download at a time per chat keep the bot fast for everyone.</div>
+        <div class="feature-card-inner">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <div class="feature-title">Lyrics</div>
+          <div class="feature-desc">Tap Lyrics under any track, or use /lyrics artist - title. Long lyrics arrive in several messages.</div>
+        </div>
       </div>
+
       <div class="feature-card">
-        <div class="feature-title">Lyrics</div>
-        <div class="feature-desc">Tap the Lyrics button under any track, or use /lyrics artist - title. Long lyrics arrive in several messages.</div>
+        <div class="feature-card-inner">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <div class="feature-title">Companion mini app</div>
+          <div class="feature-desc">An in-Telegram app for searching without typing commands.</div>
+        </div>
       </div>
+
       <div class="feature-card">
-        <div class="feature-title">Companion mini app</div>
-        <div class="feature-desc">A brutalist in-Telegram app for searching without typing commands.</div>
+        <div class="feature-card-inner">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </div>
+          <div class="feature-title">Real filenames</div>
+          <div class="feature-desc">Files arrive named by artist and title, never a raw hash.</div>
+        </div>
       </div>
+
       <div class="feature-card">
-        <div class="feature-title">Real filenames</div>
-        <div class="feature-desc">Files arrive named by artist and title, with the right title and performer, never a raw hash.</div>
+        <div class="feature-card-inner">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="feature-title">Fair-use limits</div>
+          <div class="feature-desc">A short cooldown and one download at a time per chat keep the bot fast for everyone.</div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="shortcuts">
-    <h2>No-slash shortcuts</h2>
-    <table>
-      <thead>
-        <tr><th>You type</th><th>Same as</th><th>What happens</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>play &lt;song&gt;<br>p &lt;song&gt;</td><td>/play</td><td>Downloads the best match</td></tr>
-        <tr><td>search &lt;song&gt;<br>find &lt;song&gt;</td><td>/search</td><td>Shows a list to pick from</td></tr>
-        <tr><td>recent<br>history</td><td>/recent</td><td>Shows what you played before</td></tr>
-        <tr><td>a number</td><td>tapping a row</td><td>Picks that item from the current list</td></tr>
-      </tbody>
-    </table>
-  </section>
+  <section id="shortcuts" class="reveal">
+    <div class="section-eyebrow">Shortcuts</div>
+    <h2 class="section-title">No-slash shortcuts</h2>
 
-  <section id="commands">
-    <h2>Commands</h2>
-    <table>
-      <thead>
-        <tr><th>Command</th><th>Arguments</th><th>Description</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>/start</td><td>—</td><td>Welcome message</td></tr>
-        <tr><td>/help</td><td>—</td><td>List all commands</td></tr>
-        <tr><td>/play</td><td>&lt;query&gt;</td><td>Instantly downloads the best match</td></tr>
-        <tr><td>/search</td><td>&lt;query&gt;</td><td>Shows a list of results to pick from</td></tr>
-        <tr><td>/recent</td><td>—</td><td>Replay your recently played tracks</td></tr>
-        <tr><td>/lyrics</td><td>&lt;artist&gt; - &lt;title&gt;</td><td>Fetch lyrics</td></tr>
-        <tr><td>/app</td><td>—</td><td>Open the mini app</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <section id="inline">
-    <h2>Inline mode</h2>
-    <div class="note-box">
-      <strong>Search from any chat</strong>
-      Type the bot's username followed by a song name in any conversation, then pick a result. Telegram fetches the audio itself for inline results, so the file can show the source's own filename instead of the clean artist and title naming used inside the bot chat.
+    <div class="table-shell">
+      <div class="table-core">
+        <table>
+          <thead>
+            <tr><th>You type</th><th>Same as</th><th>What happens</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>play &lt;song&gt;</code> or <code>p &lt;song&gt;</code></td><td><code>/play</code></td><td>Downloads the best match</td></tr>
+            <tr><td><code>search &lt;song&gt;</code> or <code>find &lt;song&gt;</code></td><td><code>/search</code></td><td>Shows a list to pick from</td></tr>
+            <tr><td><code>recent</code> or <code>history</code></td><td><code>/recent</code></td><td>Shows what you played before</td></tr>
+            <tr><td><code>a number</code></td><td>tapping a row</td><td>Picks that item from the current list</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 
-  <section id="architecture">
-    <h2>How it works</h2>
-    <p style="font-size: 13px; max-width: 65ch; margin-bottom: 16px;">Telegram delivers updates to this server over a webhook. Playing a track searches the music API and downloads the top match into memory; searching sends a "Searching..." message that edits in place into a numbered, tappable list. Either way, the finished file is uploaded to Telegram with real title and artist metadata, and the track is added to your recent history.</p>
-    <div class="note-box">
-      <strong>Stack</strong>
-      <div class="stack-list">
-        <span class="stack-item">Node.js 18</span>
-        <span class="stack-item">Express</span>
-        <span class="stack-item">node-telegram-bot-api</span>
-        <span class="stack-item">Telegram Bot API</span>
-        <span class="stack-item">Webhook delivery</span>
+  <section id="commands" class="reveal">
+    <div class="section-eyebrow">Commands</div>
+    <h2 class="section-title">Commands</h2>
+
+    <div class="table-shell">
+      <div class="table-core">
+        <table>
+          <thead>
+            <tr><th>Command</th><th>Arguments</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/start</code></td><td>—</td><td>Welcome message</td></tr>
+            <tr><td><code>/help</code></td><td>—</td><td>List all commands</td></tr>
+            <tr><td><code>/play</code></td><td>&lt;query&gt;</td><td>Instantly downloads the best match</td></tr>
+            <tr><td><code>/search</code></td><td>&lt;query&gt;</td><td>Shows a list of results to pick from</td></tr>
+            <tr><td><code>/recent</code></td><td>—</td><td>Replay your recently played tracks</td></tr>
+            <tr><td><code>/lyrics</code></td><td>&lt;artist&gt; - &lt;title&gt;</td><td>Fetch lyrics</td></tr>
+            <tr><td><code>/app</code></td><td>—</td><td>Open the mini app</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="inline" class="reveal">
+    <div class="section-eyebrow">Inline</div>
+    <h2 class="section-title">Inline mode</h2>
+
+    <div class="note-shell">
+      <div class="note-core">
+        <strong>Search from any chat</strong>
+        Type the bot's username followed by a song name in any conversation, then pick a result. Telegram fetches the audio itself for inline results, so the file can show the source's own filename instead of the clean artist and title naming used inside the bot chat.
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="reveal">
+    <div class="section-eyebrow">FAQ</div>
+    <h2 class="section-title">Frequently asked</h2>
+
+    <div class="faq">
+      <details class="faq-item">
+        <summary>Do I need to use a slash command?</summary>
+        <p>No. Type play, search, recent, or a number directly — the bot treats them the same as their slash versions.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What if I misspell a command?</summary>
+        <p>The bot corrects common typos like "plya" or "serach" and tells you what it assumed. Real words are never rewritten.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Why do inline results show a different filename?</summary>
+        <p>Telegram fetches inline audio itself, so it displays the source's own filename. Files sent inside the bot chat get proper artist and title metadata.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Is there a rate limit?</summary>
+        <p>Yes — a short cooldown between downloads and one download at a time per chat keeps the service responsive for everyone.</p>
+      </details>
+    </div>
+  </section>
+
+  <section id="architecture" class="reveal">
+    <div class="section-eyebrow">Architecture</div>
+    <h2 class="section-title">How it works</h2>
+    <p class="arch-text">Telegram delivers updates to this server over a webhook. Playing a track searches the music API and downloads the top match into memory; searching sends a "Searching..." message that edits in place into a numbered, tappable list. Either way, the finished file is uploaded to Telegram with real title and artist metadata, and the track is added to your recent history.</p>
+
+    <div class="note-shell">
+      <div class="note-core">
+        <strong>Stack</strong>
+        <div class="stack-list">
+          <span class="stack-item">Node.js 18</span>
+          <span class="stack-item">Express</span>
+          <span class="stack-item">node-telegram-bot-api</span>
+          <span class="stack-item">Telegram Bot API</span>
+          <span class="stack-item">Webhook delivery</span>
+        </div>
       </div>
     </div>
   </section>
 
   <footer>
-    Built with Node.js and the Telegram Bot API.
+    <span>Built with Node.js and the Telegram Bot API.</span>
+    <span class="footer-badge">Online</span>
   </footer>
 
 </div>
+
+<button class="to-top" id="toTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+(function () {
+  var progressBar = document.getElementById('progressBar');
+  var toTop = document.getElementById('toTop');
+  var burger = document.getElementById('navBurger');
+  var menu = document.getElementById('navMenu');
+
+  function updateProgress() {
+    var scrollTop = window.scrollY || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressBar.style.width = progress + '%';
+    if (scrollTop > 400) {
+      toTop.classList.add('visible');
+    } else {
+      toTop.classList.remove('visible');
+    }
+  }
+
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  toTop.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  burger.addEventListener('click', function () {
+    burger.classList.toggle('open');
+    menu.classList.toggle('open');
+  });
+
+  document.querySelectorAll('.nav-menu-item').forEach(function (el) {
+    el.addEventListener('click', function () {
+      burger.classList.remove('open');
+      menu.classList.remove('open');
+    });
+  });
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(function (el) {
+    io.observe(el);
+  });
+})();
+</script>
+
 </body>
 </html>
