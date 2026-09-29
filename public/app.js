@@ -35,35 +35,51 @@
         views[i].classList.add("hidden");
       }
     }
+
     var backBar = document.getElementById("backBar");
     if (viewName === "home") {
       backBar.classList.add("hidden");
     } else {
       backBar.classList.remove("hidden");
     }
-    if (viewName === "help") {
-      renderHelp();
+
+    if (viewName === "help") renderHelp();
+    if (viewName === "status") refreshStatus();
+
+    if (viewName === "search") {
+      var input = document.getElementById("searchInput");
+      window.setTimeout(function () {
+        input.focus();
+      }, 300);
     }
-    if (viewName === "status") {
-      refreshStatus();
-    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function renderHelp() {
     var list = document.getElementById("helpList");
     list.innerHTML = "";
+
     HELP_COMMANDS.forEach(function (item) {
-      var card = document.createElement("div");
-      card.className = "help-card";
+      var shell = document.createElement("div");
+      shell.className = "help-shell";
+
+      var core = document.createElement("div");
+      core.className = "help-core";
+
       var cmd = document.createElement("div");
       cmd.className = "help-command";
       cmd.textContent = item.command;
+
       var desc = document.createElement("div");
       desc.className = "help-desc";
       desc.textContent = item.desc;
-      card.appendChild(cmd);
-      card.appendChild(desc);
-      card.addEventListener("click", function () {
+
+      core.appendChild(cmd);
+      core.appendChild(desc);
+      shell.appendChild(core);
+
+      shell.addEventListener("click", function () {
         var plain = item.command.split(" ")[0];
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(plain).then(function () {
@@ -75,13 +91,15 @@
           showToast("Copy not supported");
         }
       });
-      list.appendChild(card);
+
+      list.appendChild(shell);
     });
   }
 
   function renderResults(items) {
     var container = document.getElementById("searchResults");
     container.innerHTML = "";
+
     if (!items || items.length === 0) {
       var empty = document.createElement("div");
       empty.className = "empty-state";
@@ -89,9 +107,13 @@
       container.appendChild(empty);
       return;
     }
+
     items.forEach(function (item) {
-      var card = document.createElement("div");
-      card.className = "result-card";
+      var shell = document.createElement("div");
+      shell.className = "result-shell";
+
+      var core = document.createElement("div");
+      core.className = "result-core";
 
       var main = document.createElement("div");
       main.className = "result-main";
@@ -104,15 +126,32 @@
       artist.className = "result-artist";
       artist.textContent = item.artist || "Unknown artist";
 
+      var arrow = document.createElement("div");
+      arrow.className = "result-arrow";
+      arrow.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+
       main.appendChild(name);
       main.appendChild(artist);
-      card.appendChild(main);
+      core.appendChild(main);
+      core.appendChild(arrow);
+      shell.appendChild(core);
 
-      card.addEventListener("click", function () {
+      shell.addEventListener("click", function () {
         openTrack(item);
       });
-      container.appendChild(card);
+
+      container.appendChild(shell);
     });
+  }
+
+  function renderSkeleton() {
+    var container = document.getElementById("searchResults");
+    container.innerHTML = "";
+    for (var i = 0; i < 3; i++) {
+      var sk = document.createElement("div");
+      sk.className = "skeleton";
+      container.appendChild(sk);
+    }
   }
 
   async function openTrack(item) {
@@ -141,19 +180,22 @@
   async function runSearch() {
     var input = document.getElementById("searchInput");
     var query = input.value.trim();
-    if (!query) {
-      return;
-    }
+    if (!query) return;
+
+    renderSkeleton();
+
     try {
       var res = await fetch("/api/mini/search?q=" + encodeURIComponent(query));
       if (!res.ok) {
         showToast("Music service unavailable");
+        renderResults([]);
         return;
       }
       var data = await res.json();
       renderResults(data.items || []);
     } catch (err) {
       showToast("Search failed");
+      renderResults([]);
     }
   }
 
@@ -172,19 +214,13 @@
 
   function describeUpstream(upstream) {
     var status = upstream && upstream.status ? upstream.status : "unknown";
-    if (status === "ok") {
-      return "Online";
-    }
-    if (status === "degraded") {
-      return "Degraded";
-    }
+    if (status === "ok") return "Online";
+    if (status === "degraded") return "Degraded";
     return "Not checked yet";
   }
 
   function formatBytes(bytes) {
-    if (typeof bytes !== "number") {
-      return "--";
-    }
+    if (typeof bytes !== "number") return "--";
     var mb = bytes / 1048576;
     return mb.toFixed(1) + " MB";
   }
@@ -196,10 +232,10 @@
       document.getElementById("uptimeDisplay").textContent = data.uptime || "--";
       document.getElementById("brandName").textContent = data.bot && data.bot !== "unconfigured" ? data.bot : "Music Bot";
       var dot = document.getElementById("statusDot");
-      dot.style.background = "var(--success)";
+      dot.classList.add("online");
     } catch (err) {
       var dot2 = document.getElementById("statusDot");
-      dot2.style.background = "var(--danger)";
+      dot2.classList.remove("online");
     }
   }
 
@@ -217,9 +253,7 @@
 
     document.getElementById("searchButton").addEventListener("click", runSearch);
     document.getElementById("searchInput").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        runSearch();
-      }
+      if (e.key === "Enter") runSearch();
     });
   }
 
