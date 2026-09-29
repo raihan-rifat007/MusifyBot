@@ -3,6 +3,8 @@
 const path = require("path");
 const express = require("express");
 const config = require("./config");
+const negotiate = require("./lib/negotiate");
+const docsPage = require("./services/docsPage");
 const createWebhookRouter = require("./routes/webhook");
 const statusRouter = require("./routes/status");
 const miniRouter = require("./routes/mini");
@@ -15,6 +17,20 @@ function createApp(bot) {
   app.disable("x-powered-by");
   app.use(express.json({ limit: "1mb" }));
   app.use(express.static(PUBLIC_DIR, { index: false }));
+
+  app.get("/", function (req, res, next) {
+    res.vary("Accept");
+    if (!negotiate.prefersHtml(req.headers.accept)) {
+      next();
+      return;
+    }
+    try {
+      res.type("html").send(docsPage.renderDocs());
+    } catch (err) {
+      console.error("[musicbot-docs] failed to render docs page", err.message);
+      next();
+    }
+  });
 
   app.use("/", statusRouter);
   app.use(config.webhookPrefix, createWebhookRouter(bot));

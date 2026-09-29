@@ -9,6 +9,7 @@ const rateLimit = require("../src/lib/rateLimit");
 const trackLib = require("../src/lib/track");
 const format = require("../src/lib/format");
 const TtlCache = require("../src/lib/ttlCache");
+const negotiate = require("../src/lib/negotiate");
 
 test("typo tolerance corrects transpositions and single insertions", function () {
   assert.equal(typoTolerance.correctPrefix("plya"), "play");
@@ -187,4 +188,22 @@ test("ttl cache expires entries and evicts the least recently used", function ()
   assert.equal(cache.size, 1);
   cache.clear();
   assert.equal(cache.size, 0);
+});
+
+test("browsers are recognised by an explicit text/html preference", function () {
+  const chromeMobile = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7";
+  assert.equal(negotiate.prefersHtml(chromeMobile), true);
+  assert.equal(negotiate.prefersHtml("TEXT/HTML"), true);
+  assert.equal(negotiate.prefersHtml("text/html, application/json"), true);
+  assert.equal(negotiate.prefersHtml("application/json;q=0.5, text/html;q=0.9"), true);
+});
+
+test("API clients, monitors and missing headers keep getting JSON", function () {
+  assert.equal(negotiate.prefersHtml("*/*"), false);
+  assert.equal(negotiate.prefersHtml("application/json"), false);
+  assert.equal(negotiate.prefersHtml("application/json, text/html;q=0.1"), false);
+  assert.equal(negotiate.prefersHtml("text/html;q=0"), false);
+  assert.equal(negotiate.prefersHtml(""), false);
+  assert.equal(negotiate.prefersHtml(undefined), false);
+  assert.equal(negotiate.prefersHtml(42), false);
 });

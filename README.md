@@ -25,12 +25,30 @@
 | **State** | In memory only. No database. Recent history and lists reset on restart |
 | **Runtime** | Node.js 18+, CommonJS, no build step |
 | **Deploy target** | Render (Docker or Blueprint), works on any host that can run Node and expose HTTPS |
-| **Tests** | 80 tests with the built-in `node:test` runner, no test dependencies |
+| **Tests** | 94 tests with the built-in `node:test` runner, no test dependencies |
 
 > [!IMPORTANT]
 > `song.id` from the search response is assumed to be the same ID the download endpoint expects. This was traced from a working reference module and could not be verified against the live API from the build environment. If audio never arrives after you tap a result, start with [Troubleshooting #3](#troubleshooting).
 
 ## Release notes
+
+### 2.0.1
+
+**Fixed**
+
+- Opening the service URL in a browser showed raw status JSON. The root URL now shows the public docs page to browsers, while `curl`, uptime monitors and other API clients still get the status JSON. The response varies on the `Accept` header.
+- A Mini App configured with the bare service URL now forwards to `/app` automatically and keeps Telegram's launch parameters. In 1.x the root URL happened to serve the Mini App, so some setups pointed BotFather at it. Setting the BotFather URL to `/app` is still the correct setup.
+
+**Added**
+
+- The docs page has an **Open in Telegram** button (needs `BOT_USERNAME`) and an **Open the Mini App** button.
+- `MINI_APP_PATH` and `DOCS_PATH` are validated. Only simple paths such as `/app` or `/tools/music` are accepted, anything else falls back to the default.
+- 14 new tests, 94 in total.
+
+**Changed**
+
+- The docs page moved from `public/docs.html` to `src/views/docs.html` and is now a template filled from your configuration. The raw template is no longer downloadable as a static file.
+- The version in the status JSON is now `2.0.1`.
 
 ### 2.0.0
 
@@ -105,7 +123,8 @@
 
 **Docs page**
 
-- Public page at `DOCS_PATH` describing commands, shortcuts, inline mode and how the bot works
+- Public page shown to browsers at the service URL (`/`) and at `DOCS_PATH`, describing commands, shortcuts, inline mode and how the bot works
+- **Open in Telegram** and **Open the Mini App** buttons, filled in from your configuration
 
 **Reliability and safety**
 
@@ -119,7 +138,7 @@
 
 - Layered structure with one responsibility per file
 - Constants, copy and limits each live in exactly one place
-- 80 tests, CI on three Node versions, `.editorconfig`, `.dockerignore`
+- 94 tests, CI on three Node versions, `.editorconfig`, `.dockerignore`
 
 ## User experience guide
 
@@ -281,10 +300,10 @@ flowchart TD
 |---|---|---|
 | Entry | `index.js`, `app.js`, `bot.js` | Bootstrap, HTTP app factory, event wiring with a crash guard |
 | Handlers | `handlers/commands/*`, `callbacks.js`, `plainText.js`, `inline.js` | Translate Telegram events into service calls |
-| Services | `catalog`, `listing`, `playback`, `lyrics` | Business rules: caching, list rendering, admission gate, download and upload |
+| Services | `catalog`, `listing`, `playback`, `lyrics`, `docsPage` | Business rules: caching, list rendering, admission gate, download and upload, docs page rendering |
 | Clients | `clients/musicApi.js` | The only file that talks to the music API, with health tracking |
 | State | `state/sessions.js` | Per-chat memory: active list, recent, lock, cooldown stamp, message to track map |
-| Lib | `commandParser`, `typoTolerance`, `rateLimit`, `ttlCache`, `track`, `format` | Pure functions with no I/O |
+| Lib | `commandParser`, `typoTolerance`, `rateLimit`, `ttlCache`, `track`, `format`, `negotiate` | Pure functions with no I/O |
 | Copy | `copy/messages.js` | Every user-facing string |
 | Constants | `constants/index.js` | Callback IDs, limits, command menu, profile text |
 
@@ -296,8 +315,7 @@ music-bot/
 ├── public/
 │   ├── index.html            Mini App shell
 │   ├── styles.css            Brutalist theme
-│   ├── app.js                Mini App logic
-│   └── docs.html             Public docs page
+│   └── app.js                Mini App logic
 ├── scripts/
 │   └── zip.js                Packages the project into dist/music-bot.zip
 ├── src/
@@ -311,12 +329,14 @@ music-bot/
 │   ├── lib/
 │   │   ├── commandParser.js
 │   │   ├── format.js
+│   │   ├── negotiate.js
 │   │   ├── rateLimit.js
 │   │   ├── track.js
 │   │   ├── ttlCache.js
 │   │   └── typoTolerance.js
 │   ├── services/
 │   │   ├── catalog.js
+│   │   ├── docsPage.js
 │   │   ├── listing.js
 │   │   ├── lyrics.js
 │   │   └── playback.js
@@ -332,16 +352,20 @@ music-bot/
 │   │   ├── callbacks.js
 │   │   ├── inline.js
 │   │   └── plainText.js
-│   └── routes/
-│       ├── docs.js
-│       ├── mini.js
-│       ├── status.js
-│       └── webhook.js
+│   ├── routes/
+│   │   ├── docs.js
+│   │   ├── mini.js
+│   │   ├── status.js
+│   │   └── webhook.js
+│   └── views/
+│       └── docs.html         Docs page template
 ├── test/
 │   ├── support/
 │   │   ├── mockBot.js
 │   │   └── stubs.js
 │   ├── concurrency.test.js
+│   ├── config.test.js
+│   ├── docsPage.test.js
 │   ├── flows.test.js
 │   ├── gate.test.js
 │   ├── inline.test.js
@@ -475,7 +499,7 @@ To point the bot at a different host, set `MUSIC_API_BASE`. It must expose the s
 
 | Method | Path | Purpose |
 |---|---|---|
-| `GET` | `/` | Status JSON: `status`, `bot`, `version`, `time` |
+| `GET` | `/` | The docs page for browsers. Status JSON (`status`, `bot`, `version`, `time`) for everything else. Varies on `Accept` |
 | `GET` | `/health` | Uptime JSON, used by the Render health check |
 | `GET` | `/api/status` | `status`, `bot`, `version`, `uptime`, `uptimeMs`, `memory`, `sessions`, `upstream` |
 | `POST` | `/webhook/<WEBHOOK_SECRET>` | Telegram update receiver |
@@ -499,8 +523,8 @@ To point the bot at a different host, set `MUSIC_API_BASE`. It must expose the s
 | `PUBLIC_URL` | Yes | none | Public HTTPS base URL, no trailing slash |
 | `BOT_USERNAME` | Recommended | none | Username with or without `@`. Used for the inline hint and status |
 | `PORT` | No | `10000` | Listening port |
-| `MINI_APP_PATH` | No | `/app` | Mini App route |
-| `DOCS_PATH` | No | `/docs` | Docs page route |
+| `MINI_APP_PATH` | No | `/app` | Mini App route. Simple paths only (letters, digits, `-`, `_`, `/`), anything else falls back to the default |
+| `DOCS_PATH` | No | `/docs` | Docs page route. Same path rules as `MINI_APP_PATH` |
 | `MUSIC_API_BASE` | No | `https://raihan07-musicapi.vercel.app` | Music API host |
 | `COOLDOWN_MS` | No | `3000` | Per-chat cooldown, `0` disables |
 | `MAX_CONCURRENT_DOWNLOADS` | No | `3` | Global download cap, minimum 1 |
@@ -543,7 +567,8 @@ Fixed limits live in `src/constants/index.js`:
    ```
    On Node 20.6 or newer you can use `node --env-file=.env src/index.js` instead.
 6. Watch the log for `webhook registered at ...` and, if profile sync is on, `synced command menu`.
-7. Message the bot: `/start`, then `play shape of you` with no slash.
+7. Open the service URL in a browser for the docs page, `/app` for the Mini App, and run `curl` against the URL to see the status JSON.
+8. Message the bot: `/start`, then `play shape of you` with no slash.
 
 > [!TIP]
 > Try `search shape of you` and tap a row as well as `play`. If one works and the other does not, compare the raw search response with the [Music API contract](#music-api-contract).
@@ -554,7 +579,7 @@ Fixed limits live in `src/constants/index.js`:
 npm test
 ```
 
-The suite uses Node's built-in runner, so there is nothing extra to install. It covers the pure libraries, session state, the music API client, every user flow through a recording mock bot, the admission gate, the global cap, inline mode, and a smoke test that loads every module and checks command patterns and route mounting.
+The suite uses Node's built-in runner, so there is nothing extra to install. It covers the pure libraries, configuration parsing, session state, the music API client, every user flow through a recording mock bot, the admission gate, the global cap, inline mode, the docs page template and its Mini App forwarding script, and a smoke test that loads every module and checks command patterns and route mounting.
 
 - Network and Telegram are never touched. `test/support/stubs.js` intercepts `axios`, `express` and `node-telegram-bot-api` at module load, `test/support/mockBot.js` records every bot call
 - Each file runs in its own process, so environment variables such as `COOLDOWN_MS` are set per file
@@ -591,7 +616,7 @@ The container runs as the unprivileged `node` user and only copies `src`, `publi
 ### 3. Mini App menu button
 
 1. `/mybots`, choose the bot, then **Bot Settings**, then **Menu Button**.
-2. Set the URL to `PUBLIC_URL + MINI_APP_PATH`, for example `https://your-service.onrender.com/app`, and choose a button title.
+2. Set the URL to `PUBLIC_URL + MINI_APP_PATH`, for example `https://your-service.onrender.com/app`, and choose a button title. Use the `/app` URL, not the bare service URL, which is the docs page.
 3. The URL must be HTTPS and match your `PUBLIC_URL` domain. The `/app` command opens the same Mini App with an inline button.
 
 ### 4. Groups (optional)
@@ -654,12 +679,13 @@ The **Privacy Policy** field on the bot info screen is an optional link for comp
 - **Logs** contain error messages and operational events, not message text
 - **Webhook** path includes `WEBHOOK_SECRET`. Use a long random value
 - **Public endpoints:** `/api/status` shows uptime, memory and session count but no user data. The Mini App proxy routes only expose search results and the direct download URL, both of which already come from the public music API, so the Mini App does not validate Telegram's `initData`
+- **Docs page** is a fixed template. The only values inserted are your configured bot username (URL-encoded) and Mini App path (validated to simple characters)
 - **Container** runs as a non-root user and ships no dev files
 
 ## Troubleshooting
 
 <details>
-<summary><strong>Click to expand: 16 common issues</strong></summary>
+<summary><strong>Click to expand: 17 common issues</strong></summary>
 
 **1. Webhook registration fails on startup (`setWebHook failed` in the logs)**
 Confirm `PUBLIC_URL` is a valid HTTPS URL with no trailing slash and that the service is reachable at that URL before the bot registers.
@@ -709,6 +735,13 @@ Open the URL in a normal browser and check the console. Confirm `MINI_APP_PATH` 
 **16. Render free tier is slow after a quiet period**
 The instance sleeps when idle. The first request wakes it and Telegram retries the webhook, so the first reply is late but not lost.
 
+**17. The service URL or the Mini App shows raw JSON**
+That JSON (`status`, `bot`, `version`, `time`) is the status endpoint at `/`, meant for API clients and health checks. Browsers get the docs page there instead, and the Mini App lives at `/app`. If you still see JSON:
+- You are running 2.0.0. Redeploy 2.0.1, which added the docs page at `/`.
+- Your client does not ask for HTML (`curl` and some monitors do not). Open `/docs` directly.
+- The BotFather menu button points at the bare service URL. Since 2.0.1 that page forwards to the Mini App by itself, but set the URL to `https://<your-service>.onrender.com/app` to skip the extra hop.
+- `MINI_APP_PATH` on Render is set to something other than `/app`. Open that path instead.
+
 </details>
 
 ## Design decisions
@@ -719,6 +752,7 @@ The instance sleeps when idle. The first request wakes it and Telegram retries t
 - **Notice instead of silent correction.** When the bot guesses, it says what it assumed
 - **One cache, many callers.** Bot search, inline mode and the Mini App all go through `services/catalog`, so one query costs one API call
 - **Copy and constants centralised.** Every user string is in `copy/messages.js` and every magic value in `constants`, which keeps handlers short and makes wording changes a one-file edit
+- **Content negotiation at the root URL.** People open the service URL in a browser and expect a page, monitors and scripts expect JSON. One route serves both by looking at the `Accept` header, and both responses declare that they vary on it
 - **Result objects instead of empty arrays for failure.** `{ ok: false }` lets the UI say "service down" instead of "no results"
 
 ## Roadmap

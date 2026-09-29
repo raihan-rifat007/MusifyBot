@@ -19,14 +19,22 @@ function trimTrailingSlashes(value) {
   return value.replace(/\/+$/, "");
 }
 
+function readPath(name, fallback) {
+  const raw = process.env[name];
+  if (typeof raw !== "string" || !/^\/[A-Za-z0-9_-][A-Za-z0-9/_-]*$/.test(raw)) {
+    return fallback;
+  }
+  return trimTrailingSlashes(raw);
+}
+
 const config = {
   botToken: process.env.BOT_TOKEN || "",
   botUsername: (process.env.BOT_USERNAME || "").replace(/^@/, ""),
   webhookSecret: process.env.WEBHOOK_SECRET || "changeme",
   publicUrl: trimTrailingSlashes(process.env.PUBLIC_URL || ""),
   port: readInt("PORT", 10000),
-  miniAppPath: process.env.MINI_APP_PATH || "/app",
-  docsPath: process.env.DOCS_PATH || "/docs",
+  miniAppPath: readPath("MINI_APP_PATH", "/app"),
+  docsPath: readPath("DOCS_PATH", "/docs"),
   apiBase: trimTrailingSlashes(process.env.MUSIC_API_BASE || "https://raihan07-musicapi.vercel.app"),
   pageSize: constants.LIMITS.PAGE_SIZE,
   cooldownMs: Math.max(0, readInt("COOLDOWN_MS", constants.LIMITS.COOLDOWN_MS)),

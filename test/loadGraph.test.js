@@ -10,6 +10,7 @@ const stubs = require("./support/stubs");
 const registrations = { onText: [], on: [] };
 const staticCalls = [];
 const useCalls = [];
+const routeOrder = [];
 
 class FakeTelegramBot {
   constructor(token, options) {
@@ -30,9 +31,13 @@ function fakeExpress() {
   const app = {
     disable: function () {},
     use: function () {
-      useCalls.push(Array.prototype.slice.call(arguments));
+      const args = Array.prototype.slice.call(arguments);
+      useCalls.push(args);
+      routeOrder.push({ method: "use", path: typeof args[0] === "string" ? args[0] : null });
     },
-    get: function () {}
+    get: function (routePath, handler) {
+      routeOrder.push({ method: "get", path: routePath, handler: handler });
+    }
   };
   return app;
 }
@@ -60,11 +65,13 @@ const modules = [
   "../src/copy/messages",
   "../src/lib/commandParser",
   "../src/lib/format",
+  "../src/lib/negotiate",
   "../src/lib/rateLimit",
   "../src/lib/track",
   "../src/lib/ttlCache",
   "../src/lib/typoTolerance",
   "../src/services/catalog",
+  "../src/services/docsPage",
   "../src/services/listing",
   "../src/services/lyrics",
   "../src/services/playback",
@@ -152,4 +159,54 @@ test("the express app serves static files without shadowing the status route", f
   assert.ok(mounted.indexOf("/webhook") !== -1);
   assert.ok(mounted.indexOf("/api/mini") !== -1);
   assert.ok(mounted.indexOf("/docs") !== -1);
+});
+
+function runRootHandler(accept) {
+  const entry = routeOrder.filter(function (item) {
+    return item.method === "get" && item.path === "/";
+  })[0];
+  const state = { nextCalled: false, body: null, type: null, vary: null };
+  const res = {
+    vary: function (value) {
+      state.vary = value;
+      return res;
+    },
+    type: function (value) {
+      state.type = value;
+      return res;
+    },
+    send: function (body) {
+      state.body = body;
+      return res;
+    }
+  };
+  entry.handler({ headers: { accept: accept } }, res, function () {
+    state.nextCalled = true;
+  });
+  return state;
+}
+
+test("the root URL shows the docs page to browsers and stays JSON for API clients", function () {
+  const rootIndex = routeOrder.findIndex(function (item) {
+    return item.method === "get" && item.path === "/";
+  });
+  const statusIndex = routeOrder.findIndex(function (item) {
+    return item.method === "use" && item.path === "/";
+  });
+  assert.ok(rootIndex !== -1);
+  assert.ok(rootIndex < statusIndex);
+
+  const browser = runRootHandler("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+  assert.equal(browser.nextCalled, false);
+  assert.equal(browser.type, "html");
+  assert.equal(browser.vary, "Accept");
+  assert.match(browser.body, /Type a song name/);
+
+  const curl = runRootHandler("*/*");
+  assert.equal(curl.nextCalled, true);
+  assert.equal(curl.body, null);
+  assert.equal(curl.vary, "Accept");
+
+  assert.equal(runRootHandler(undefined).nextCalled, true);
+  assert.equal(runRootHandler("application/json").nextCalled, true);
 });

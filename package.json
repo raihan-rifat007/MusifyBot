@@ -1,6 +1,6 @@
 {
   "name": "musicapi-telegram-bot",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Telegram music bot with instant play, pick-list search, recent history, inline mode and a Mini App",
   "private": true,
   "main": "src/index.js",

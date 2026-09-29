@@ -1,12 +1,17 @@
 "use strict";
 
-const path = require("path");
 const express = require("express");
+const docsPage = require("../services/docsPage");
 
 const router = express.Router();
 
-router.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname, "..", "..", "public", "docs.html"));
+router.get("/", function (req, res, next) {
+  try {
+    res.type("html").send(docsPage.renderDocs());
+  } catch (err) {
+    console.error("[musicbot-docs] failed to render docs page", err.message);
+    next(err);
+  }
 });
 
 module.exports = router;
