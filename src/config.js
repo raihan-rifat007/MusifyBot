@@ -35,7 +35,7 @@ const config = {
   port: readInt("PORT", 10000),
   miniAppPath: readPath("MINI_APP_PATH", "/app"),
   docsPath: readPath("DOCS_PATH", "/docs"),
-  apiBase: trimTrailingSlashes(process.env.MUSIC_API_BASE || "https://raihan07-musicapi.vercel.app"),
+  apiBase: trimTrailingSlashes(process.env.MUSIC_API_BASE || "https://musicapi-by-raihan.vercel.app"),
   pageSize: constants.LIMITS.PAGE_SIZE,
   cooldownMs: Math.max(0, readInt("COOLDOWN_MS", constants.LIMITS.COOLDOWN_MS)),
   maxConcurrentDownloads: Math.max(1, readInt("MAX_CONCURRENT_DOWNLOADS", constants.LIMITS.MAX_CONCURRENT_DOWNLOADS)),
